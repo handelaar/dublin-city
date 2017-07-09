@@ -96,53 +96,48 @@ foreach ($resultparser->find('tr') as $application) {
 	// uncut extra data is TWO more URLgets away, annoyingly
 	$remaininginfo = file_get_contents($info_url);
 	
-	// Do nothing if decsion made
-	if(!(stristr($remaininginfo,'Decision Made by Fingal County Council'))) {
-		$details = new simple_html_dom();
-		$details->load($remaininginfo);
-		$date_received = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',0)->find('td',3)->plaintext));
-		$date_scraped = date($date_format);
-		$on_notice_from = $date_received;
-		$on_notice_to = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',4)->find('td',1)->plaintext));
-		unset($todate,$details,$remaininginfo);
+	$details = new simple_html_dom();
+	$details->load($remaininginfo);
+	$date_received = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',0)->find('td',3)->plaintext));
+	$date_scraped = date($date_format);
+	$on_notice_from = $date_received;
+	$on_notice_to = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',4)->find('td',1)->plaintext));
+	unset($todate,$details,$remaininginfo);
+	
+	$descriptionpage = file_get_contents($info_url . '&theTabNo=6');
+	$descriptionscraper = new simple_html_dom();
+	$descriptionscraper->load($descriptionpage);
+	$description = $descriptionscraper->find('input',2)->value;
+	
+	// Remember when you thought this was the most longwinded part of this?
+	$coords = getPointFromJSONURI($council_reference);
+	if(!($coords == FALSE)) {	
+		$application = array(
+			'council_reference' => $council_reference,
+			'address' => $address,
+			'lat' => $coords['lat'],
+			'lng' => $coords['lng'],
+			'description' => $description,
+			'info_url' => $info_url,
+			'comment_url' => $comment_url,
+			'date_scraped' => $date_scraped,
+			'date_received' => $date_received,
+			'on_notice_from' => $on_notice_from,
+			'on_notice_to' => $on_notice_to
+		);
+		print_r($application);
+		exit();
 		
-		$descriptionpage = file_get_contents($info_url . '&theTabNo=6');
-		$descriptionscraper = new simple_html_dom();
-		$descriptionscraper->load($descriptionpage);
-		$description = $descriptionscraper->find('input',2)->value;
-		
-		// Remember when you thought this was the most longwinded part of this?
-		//$coords = getPointFromJSONURI($council_reference);
-		if(!($coords == FALSE)) {	
-			$application = array(
-				'council_reference' => $council_reference,
-				'address' => $address,
-				'lat' => $coords['lat'],
-				'lng' => $coords['lng'],
-				'description' => $description,
-				'info_url' => $info_url,
-				'comment_url' => $comment_url,
-				'date_scraped' => $date_scraped,
-				'date_received' => $date_received,
-				'on_notice_from' => $on_notice_from,
-				'on_notice_to' => $on_notice_to
-			);
-			print_r($application);
-			exit();
-			
-			$existingRecords = scraperwiki::select("* from data where `council_reference`='" . $application['council_reference'] . "'");
-			if (sizeof($existingRecords) == 0) {
-				# print_r ($application);
-				scraperwiki::save(array('council_reference'), $application);
-				print (" ...saved\n");
-			} else {
-				print (" ...skipping already saved record " . $application['council_reference'] . "\n");
-			}
+		$existingRecords = scraperwiki::select("* from data where `council_reference`='" . $application['council_reference'] . "'");
+		if (sizeof($existingRecords) == 0) {
+			# print_r ($application);
+			scraperwiki::save(array('council_reference'), $application);
+			print (" ...saved\n");
 		} else {
-			echo " ...skipping because no geometry\n";
+			print (" ...skipping already saved record " . $application['council_reference'] . "\n");
 		}
 	} else {
-		echo " ...skipping because closed\n";
+		echo " ...skipping because no geometry\n";
 	}
 
 
