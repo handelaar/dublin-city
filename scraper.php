@@ -16,7 +16,7 @@ require 'scraperwiki/simple_html_dom.php';
 include_once('vendor/phayes/geophp/geoPHP.inc');
 $date_format = 'Y-m-d';
 $cookie_file = '/tmp/cookies.txt';
-$remote_uri = 'http://www.dublincity.ie/swiftlg/apas/run/wphappcriteria.display';
+$remote_uri = 'http://www.dublincity.ie/swiftlg/apas/run/WHAPPCRITERIA';
 $daysago = time() - (31*24*60*60);
 
 $formfields = array(
