@@ -23,6 +23,7 @@ $formfields = array(
   'APNID.MAINBODY.WPACIS.1' => '',
   'JUSTLOCATION.MAINBODY.WPACIS.1' => '',
   'JUSTDEVDESC.MAINBODY.WPACIS.1' => '',
+  'AREA.MAINBODY.WPACIS.1:' => '',
   'SURNAME.MAINBODY.WPACIS.1' => '',
   'REGFROMDATE.MAINBODY.WPACIS.1' => date('d/m/Y',$daysago),
   'REGTODATE.MAINBODY.WPACIS.1' => date('d/m/Y'),
@@ -34,8 +35,10 @@ $formfields = array(
   'APELDGDATTO.MAINBODY.WPACIS.1' => '',
   'APEDECDATFROM.MAINBODY.WPACIS.1' => '',
   'APEDECDATTO.MAINBODY.WPACIS.1' => '',
-  'SEARCHBUTTON.MAINBODY.WPACIS.1' => 'Search!'  
+  'SEARCHBUTTON.MAINBODY.WPACIS.1' => 'Search!',
+  '%.MAINBODY.WPACIS.1:' => ''
 );
+
 
 //url-ify the data for the POST
 foreach($formfields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
