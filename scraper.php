@@ -153,11 +153,11 @@ exit();
 
 
 function extractRows($html) {
-	$split1 = explode('<th class="apas_tblHead"><input type="submit" name="COMPADDBUT.MAINBODY.PACIS2.1" value="Location" class="apas_tblHead_button" /></th>',$html);
-	$split2 = explode('</table>',$split1[1]);
-	$split3 = explode('</tr>',$split2[0]);
+	$split1 = explode('<TH class="tablehead" ><div align="left">Location</div></TH>',$html);
+	$split2 = explode('</TABLE>',$split1[1]);
+	$split3 = explode('</TR class="tablebody">',$split2[0]);
 	unset ($split3[0]);
-	return implode('</tr>',$split3);
+	return implode('',$split3);
 }
 
 
