@@ -16,7 +16,7 @@ require 'scraperwiki/simple_html_dom.php';
 include_once('vendor/phayes/geophp/geoPHP.inc');
 $date_format = 'Y-m-d';
 $cookie_file = '/tmp/cookies.txt';
-$remote_uri = 'http://planning.fingalcoco.ie/swiftlg/apas/run/WPHAPPCRITERIA';
+$remote_uri = 'http://www.dublincity.ie/swiftlg/apas/run/wphappcriteria.display';
 $daysago = time() - (31*24*60*60);
 
 $formfields = array(
@@ -34,7 +34,7 @@ $formfields = array(
   'APELDGDATTO.MAINBODY.WPACIS.1' => '',
   'APEDECDATFROM.MAINBODY.WPACIS.1' => '',
   'APEDECDATTO.MAINBODY.WPACIS.1' => '',
-  'SEARCHBUTTON.MAINBODY.WPACIS.1' => 'Search'  
+  'SEARCHBUTTON.MAINBODY.WPACIS.1' => 'Search!'  
 );
 
 //url-ify the data for the POST
@@ -42,7 +42,7 @@ foreach($formfields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
 rtrim($fields_string, '&');
 
 // Get search form to acquire session cookie 
-$curl = curl_init('http://planning.fingalcoco.ie/swiftlg/apas/run/wphappcriteria.display');
+$curl = curl_init('http://www.dublincity.ie/swiftlg/apas/run/wphappcriteria.display');
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_COOKIEJAR, $cookie_file);
 curl_setopt($curl, CURLOPT_COOKIEFILE, $cookie_file);
@@ -72,7 +72,7 @@ $links = $pageparser->find('#apas_form_text a');
 $pages = array();
 foreach ($links as $link) {
   $parts = explode('BackURL=',$link->href);
-  $pages[] .= 'http://planning.fingalcoco.ie/swiftlg/apas/run/' . $parts[0];
+  $pages[] .= 'http://www.dublincity.ie/swiftlg/apas/run/' . $parts[0];
 }
 unset($pageparser);
 
@@ -89,9 +89,9 @@ foreach ($resultparser->find('tr') as $application) {
 	echo "Found $council_reference";
 	$address = trim($application->find('td',2)->plaintext);
 	$urlparts = explode('&backURL=',$application->find('td a',0)->href);
-	$info_url = 'http://planning.fingalcoco.ie/swiftlg/apas/run/' . $urlparts[0];
+	$info_url = 'http://www.dublincity.ie/swiftlg/apas/run/' . $urlparts[0];
 	unset($urlparts);
-	$comment_url = 'http://planning.fingalcoco.ie/swiftlg/apas/run/wchintlogin.display?ApnID=' . $council_reference;
+	$comment_url = 'http://www.dublincity.ie/swiftlg/apas/run/wchintlogin.display?ApnID=' . $council_reference;
 	
 	// uncut extra data is TWO more URLgets away, annoyingly
 	$remaininginfo = file_get_contents($info_url);
@@ -100,28 +100,19 @@ foreach ($resultparser->find('tr') as $application) {
 	if(!(stristr($remaininginfo,'Decision Made by Fingal County Council'))) {
 		$details = new simple_html_dom();
 		$details->load($remaininginfo);
-		$date_received = date($date_format,strtotime($details->find('#apas_form',0)->find('div p',1)->plaintext));
+		$date_received = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',0)->find('td',3)->plaintext));
 		$date_scraped = date($date_format);
 		$on_notice_from = $date_received;
-		$todate = $details->find('#apas_form div',13)->plaintext;
-		if(stristr($todate,'application may be made on or before ')) {
-			$todate = explode('application may be made on or before ',$todate);
-			$on_notice_to = date($date_format,strtotime($todate[1]));
-		} elseif (stristr($todate,'period for this application expired on ')) {
-			$todate = explode('period for this application expired on ',$todate);
-			$on_notice_to = date($date_format,strtotime($todate[1]));
-		} else {
-			$on_notice_to = date($date_format,(strtotime($date_received) + (60*60*24*35)));
-		}
+		$on_notice_to = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',4)->find('td',1)->plaintext));
 		unset($todate,$details,$remaininginfo);
 		
-		$descriptionpage = file_get_contents($info_url . '&theTabNo=11');
+		$descriptionpage = file_get_contents($info_url . '&theTabNo=6');
 		$descriptionscraper = new simple_html_dom();
 		$descriptionscraper->load($descriptionpage);
 		$description = $descriptionscraper->find('input',2)->value;
 		
 		// Remember when you thought this was the most longwinded part of this?
-		$coords = getPointFromJSONURI($council_reference);
+		//$coords = getPointFromJSONURI($council_reference);
 		if(!($coords == FALSE)) {	
 			$application = array(
 				'council_reference' => $council_reference,
@@ -136,6 +127,8 @@ foreach ($resultparser->find('tr') as $application) {
 				'on_notice_from' => $on_notice_from,
 				'on_notice_to' => $on_notice_to
 			);
+			print_r($application);
+			exit();
 			
 			$existingRecords = scraperwiki::select("* from data where `council_reference`='" . $application['council_reference'] . "'");
 			if (sizeof($existingRecords) == 0) {
@@ -169,6 +162,7 @@ function extractRows($html) {
 
 
 function getPointFromJSONURI($ref) {
+	/*
   $uri = file_get_contents('http://gis.fingal.ie/arcgis/rest/services/Planning/PlanningApplicationsWeb/MapServer/2/query?f=json&where=PLANNING_REFERENCE%3D%27' . urlencode($ref) .'%27&returnGeometry=true&spatialRel=esriSpatialRelIntersects&maxAllowableOffset=0.00001&outFields=*&outSR=4326');
   $application = json_decode($uri);
   if(count($application->features) > 0) {
@@ -181,8 +175,8 @@ function getPointFromJSONURI($ref) {
 		'lat' => $lat,
 		'lng' => $lng,
 	  );
-  } else {
-  	  return FALSE;
+  } else { */
+  	  return TRUE;
   }
 }
 
