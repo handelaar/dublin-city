@@ -76,13 +76,15 @@ foreach ($links as $link) {
 }
 unset($pageparser);
 
+echo "links:\n";
+print_r($pages);
+die();
+
 // Append table rows from all subsequent pages to $resultslist
 foreach($pages as $page) {
     $resultslist .= extractRows(file_get_contents($page));
 }
 
-print_r($resultslist);
-die();
 
 // Finally actually process the data
 $resultparser = new simple_html_dom();
