@@ -65,6 +65,8 @@ $response = curl_exec($curl);
 curl_close($curl);
 
 echo "First POSTED page output\n" .$response . "\n\n\n";
+echo "cookiejar:\n";
+echo file_get_contents($cookie_file);
 die();
 
 $resultslist = '';
