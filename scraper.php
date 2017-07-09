@@ -1,7 +1,7 @@
 <?php
 //
 // Dublin City Council Planning Applications
-// John Handelaar 2017-07-03
+// John Handelaar 2017-07-09
 
 // Get feature ID of planning application
 // http://www.dublincity.ie/LocationPublisher/SearchResult.aspx?Group_ID=1&amp;SearchString=3190/17&amp;IsSearchSP=1&amp;RefreshGuid=9a9919ee-7457-4412-9b43-58e74dcbd3cc
@@ -80,6 +80,9 @@ unset($pageparser);
 foreach($pages as $page) {
     $resultslist .= extractRows(file_get_contents($page));
 }
+
+print_r($resultslist);
+die();
 
 // Finally actually process the data
 $resultparser = new simple_html_dom();
