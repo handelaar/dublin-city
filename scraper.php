@@ -67,7 +67,7 @@ $resultslist .= extractRows($response);
 // Collect other search URIs
 $pageparser = new simple_html_dom();
 $pageparser->load($response);
-$links = $pageparser->find('#apas_form_text a');    
+$links = $pageparser->find('#bodyContent form a');    
 
 $pages = array();
 foreach ($links as $link) {
@@ -103,10 +103,10 @@ foreach ($resultparser->find('tr') as $application) {
 	
 	$details = new simple_html_dom();
 	$details->load($remaininginfo);
-	$date_received = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',0)->find('td',3)->plaintext));
+	$date_received = date($date_format,strtotime($details->find('#bodyContent form',0)->find('tr',0)->find('td',3)->plaintext));
 	$date_scraped = date($date_format);
 	$on_notice_from = $date_received;
-	$on_notice_to = date($date_format,strtotime($details->find('#body_content form',0)->find('tr',4)->find('td',1)->plaintext));
+	$on_notice_to = date($date_format,strtotime($details->find('#bodyContent form',0)->find('tr',4)->find('td',1)->plaintext));
 	unset($todate,$details,$remaininginfo);
 	
 	$descriptionpage = file_get_contents($info_url . '&theTabNo=6');
