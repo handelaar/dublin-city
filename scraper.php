@@ -61,6 +61,9 @@ curl_setopt($curl, CURLOPT_COOKIEFILE, $cookie_file);
 $response = curl_exec($curl);
 curl_close($curl);
 
+echo "First POSTED page output\n" .$response . "\n\n\n";
+die();
+
 $resultslist = '';
 $resultslist .= extractRows($response);
 
@@ -78,6 +81,8 @@ unset($pageparser);
 
 echo "links:\n";
 print_r($pages);
+echo "rows:\n";
+print_r($resultslist);
 die();
 
 // Append table rows from all subsequent pages to $resultslist
